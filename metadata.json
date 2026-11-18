@@ -1,0 +1,6 @@
+{
+  "name": "Mộc hoa | Quà tặng thủ công & Thiệp cá nhân hóa",
+  "description": "Mộc hoa – thương hiệu quà tặng thủ công sáng tạo với hoa kẽm nhung, thiệp hoa kẹp và Combo Mộc Ý. Cá nhân hóa món quà, viết lời thương và lưu giữ những khoảnh khắc đáng nhớ.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
