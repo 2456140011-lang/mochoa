@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle2, QrCode } from 'lucide-react';
 import { PERSONALIZATION_OPTIONS } from '../data/mocHoaData';
+import { submitOrderToSheet } from '../utils/sheetOrders';
 
 const FLOWER_CHOICES = [
   { id: 'tulip', label: 'Hoa Tulip nhung' },
@@ -35,16 +36,48 @@ export const PersonalizationSection: React.FC = () => {
   const [senderContact, setSenderContact] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [submittedRef, setSubmittedRef] = useState<string | null>(null);
+  const [syncedAt, setSyncedAt] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!senderContact.trim() || !message.trim()) {
       setErrorMsg('Vui lòng nhập lời chúc và thông tin liên hệ (Email hoặc SĐT) để Mộc hoa phản hồi.');
       return;
     }
     setErrorMsg('');
+    setIsSubmitting(true);
     const code = `MH-${Math.floor(1000 + Math.random() * 9000)}`;
-    setSubmittedRef(code);
+    const details = [
+      `Loại quà: ${giftType}`,
+      `Hoa: ${flower}`,
+      `Tông màu: ${tone.label}`,
+      recipientName.trim() ? `Người nhận: ${recipientName.trim()}` : null,
+      `Lời chúc: "${message.trim()}"`,
+      includeQrAudio ? 'Kèm viết chữ nghệ thuật & mã QR âm thanh' : null,
+    ]
+      .filter(Boolean)
+      .join(' | ');
+
+    try {
+      const res = await submitOrderToSheet({
+        orderCode: code,
+        type: 'Yêu cầu cá nhân hóa',
+        customerName: recipientName.trim()
+          ? `Gửi ${recipientName.trim()}`
+          : 'Khách cá nhân hóa',
+        contact: senderContact.trim(),
+        address: '',
+        details,
+        total: 'Tư vấn báo giá',
+      });
+      setSubmittedRef(code);
+      setSyncedAt(res.syncedAt ?? new Date().toISOString());
+    } catch {
+      setErrorMsg('Không thể gửi yêu cầu lúc này. Vui lòng thử lại sau ít phút.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -164,9 +197,21 @@ export const PersonalizationSection: React.FC = () => {
                   <strong>{senderContact}</strong> trong thời gian sớm nhất để chốt mẫu và thời
                   gian giao hàng.
                 </p>
+                {syncedAt && (
+                  <p className="text-xs text-[#735748] tabular-nums">
+                    Ghi nhận lúc{' '}
+                    {new Date(syncedAt).toLocaleTimeString('vi-VN', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                )}
                 <button
                   type="button"
-                  onClick={() => setSubmittedRef(null)}
+                  onClick={() => {
+                    setSubmittedRef(null);
+                    setSyncedAt(null);
+                  }}
                   className="px-4 py-2 text-xs font-semibold text-[#F4EBDD] bg-[#735748] hover:bg-[#3F2E24] rounded-lg transition-colors cursor-pointer"
                 >
                   Tạo thêm một yêu cầu khác
@@ -313,9 +358,10 @@ export const PersonalizationSection: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-[#F4EBDD] bg-[#735748] hover:bg-[#3F2E24] rounded-lg transition-colors cursor-pointer"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-[#F4EBDD] bg-[#735748] hover:bg-[#3F2E24] disabled:opacity-60 rounded-lg transition-colors cursor-pointer"
                 >
-                  Gửi yêu cầu cá nhân hóa
+                  {isSubmitting ? 'Đang gửi yêu cầu...' : 'Gửi yêu cầu cá nhân hóa'}
                 </button>
               </form>
             )}

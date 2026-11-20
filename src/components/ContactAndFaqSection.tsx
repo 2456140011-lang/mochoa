@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CheckCircle2, ChevronDown } from 'lucide-react';
 import { FAQ_ITEMS, IMAGES } from '../data/mocHoaData';
 import { SafeImage } from './SafeImage';
+import { submitOrderToSheet } from '../utils/sheetOrders';
 
 export const ContactAndFaqSection: React.FC = () => {
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
@@ -9,16 +10,37 @@ export const ContactAndFaqSection: React.FC = () => {
   const [contact, setContact] = useState('');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
+  const [syncedAt, setSyncedAt] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !contact.trim() || !message.trim()) {
       setErrorMsg('Vui lòng điền đầy đủ họ tên, thông tin liên hệ và nội dung lời nhắn.');
       return;
     }
     setErrorMsg('');
-    setSent(true);
+    setIsSubmitting(true);
+    const code = `MSG-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    try {
+      const res = await submitOrderToSheet({
+        orderCode: code,
+        type: 'Lời nhắn liên hệ',
+        customerName: name.trim(),
+        contact: contact.trim(),
+        address: '',
+        details: message.trim(),
+        total: '',
+      });
+      setSent(true);
+      setSyncedAt(res.syncedAt ?? new Date().toISOString());
+    } catch {
+      setErrorMsg('Không thể gửi lời nhắn lúc này. Vui lòng thử lại sau ít phút.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -98,10 +120,20 @@ export const ContactAndFaqSection: React.FC = () => {
                       Mộc hoa đã nhận được tin nhắn và sẽ phản hồi bạn qua{' '}
                       <strong>{contact}</strong> trong thời gian sớm nhất.
                     </p>
+                    {syncedAt && (
+                      <p className="text-xs text-[#735748] tabular-nums">
+                        Ghi nhận lúc{' '}
+                        {new Date(syncedAt).toLocaleTimeString('vi-VN', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
                         setSent(false);
+                        setSyncedAt(null);
                         setMessage('');
                       }}
                       className="px-4 py-2 text-xs font-semibold text-[#F4EBDD] bg-[#735748] rounded-lg cursor-pointer"
@@ -171,9 +203,10 @@ export const ContactAndFaqSection: React.FC = () => {
 
                     <button
                       type="submit"
-                      className="px-6 py-2.5 text-sm font-semibold text-[#F4EBDD] bg-[#735748] hover:bg-[#3F2E24] rounded-lg transition-colors cursor-pointer"
+                      disabled={isSubmitting}
+                      className="px-6 py-2.5 text-sm font-semibold text-[#F4EBDD] bg-[#735748] hover:bg-[#3F2E24] disabled:opacity-60 rounded-lg transition-colors cursor-pointer"
                     >
-                      Gửi lời nhắn
+                      {isSubmitting ? 'Đang gửi lời nhắn...' : 'Gửi lời nhắn'}
                     </button>
                   </form>
                 )}

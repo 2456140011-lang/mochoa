@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { B2B_SERVICES, IMAGES } from '../data/mocHoaData';
 import { SafeImage } from './SafeImage';
+import { submitOrderToSheet } from '../utils/sheetOrders';
 
 export const BusinessSection: React.FC = () => {
   const [orgName, setOrgName] = useState('');
@@ -11,15 +12,39 @@ export const BusinessSection: React.FC = () => {
   const [notes, setNotes] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [syncedAt, setSyncedAt] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!orgName.trim() || !contactEmail.trim()) {
       setErrorMsg('Vui lòng nhập tên tổ chức/đơn vị và email hoặc số điện thoại liên hệ.');
       return;
     }
     setErrorMsg('');
-    setSubmitted(true);
+    setIsSubmitting(true);
+    const code = `B2B-${Math.floor(1000 + Math.random() * 9000)}`;
+    const details = `Nhu cầu: ${partnerType} | Số lượng dự kiến: ${quantity}${
+      notes.trim() ? ` | Ý tưởng: ${notes.trim()}` : ''
+    }`;
+
+    try {
+      const res = await submitOrderToSheet({
+        orderCode: code,
+        type: 'Khách hàng doanh nghiệp',
+        customerName: orgName.trim(),
+        contact: contactEmail.trim(),
+        address: '',
+        details,
+        total: 'Báo giá hợp tác',
+      });
+      setSubmitted(true);
+      setSyncedAt(res.syncedAt ?? new Date().toISOString());
+    } catch {
+      setErrorMsg('Không thể gửi yêu cầu lúc này. Vui lòng thử lại sau ít phút.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -115,10 +140,20 @@ export const BusinessSection: React.FC = () => {
                   Đội ngũ Mộc hoa sẽ gửi báo giá và mẫu đề xuất qua <strong>{contactEmail}</strong>{' '}
                   trong vòng 24 giờ làm việc.
                 </p>
+                {syncedAt && (
+                  <p className="text-xs text-[#735748] tabular-nums">
+                    Ghi nhận lúc{' '}
+                    {new Date(syncedAt).toLocaleTimeString('vi-VN', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={() => {
                     setSubmitted(false);
+                    setSyncedAt(null);
                     setOrgName('');
                     setNotes('');
                   }}
@@ -228,9 +263,10 @@ export const BusinessSection: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="px-6 py-3 text-sm font-semibold text-[#F4EBDD] bg-[#735748] hover:bg-[#3F2E24] rounded-lg transition-colors cursor-pointer"
+                  disabled={isSubmitting}
+                  className="px-6 py-3 text-sm font-semibold text-[#F4EBDD] bg-[#735748] hover:bg-[#3F2E24] disabled:opacity-60 rounded-lg transition-colors cursor-pointer"
                 >
-                  Liên hệ hợp tác
+                  {isSubmitting ? 'Đang gửi thông tin...' : 'Liên hệ hợp tác'}
                 </button>
               </form>
             )}

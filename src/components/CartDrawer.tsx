@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CheckCircle2, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import { ProductItem } from '../data/mocHoaData';
 import { SafeImage } from './SafeImage';
+import { submitOrderToSheet } from '../utils/sheetOrders';
 
 export interface CartItem {
   key: string;
@@ -35,7 +36,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [customerPhone, setCustomerPhone] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [orderConfirmed, setOrderConfirmed] = useState<string | null>(null);
+  const [confirmedAt, setConfirmedAt] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
@@ -44,16 +47,42 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const shippingFee = subtotal === 0 || subtotal >= freeShippingThreshold ? 0 : 25000;
   const total = subtotal + shippingFee;
 
-  const handleCheckout = (e: React.FormEvent) => {
+  const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName.trim() || !customerPhone.trim() || !deliveryAddress.trim()) {
       setErrorMsg('Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ người nhận.');
       return;
     }
     setErrorMsg('');
+    setIsSubmitting(true);
     const orderNumber = `MH-${Math.floor(1000 + Math.random() * 9000)}`;
-    setOrderConfirmed(orderNumber);
-    onClearCart();
+    const itemsSummary = items
+      .map(
+        (item) =>
+          `${item.quantity}x ${item.product.name} (${item.variant})${
+            item.note ? ` - Lời nhắn: "${item.note}"` : ''
+          }`
+      )
+      .join(' | ');
+
+    try {
+      const res = await submitOrderToSheet({
+        orderCode: orderNumber,
+        type: 'Đặt quà từ giỏ hàng',
+        customerName: customerName.trim(),
+        contact: customerPhone.trim(),
+        address: deliveryAddress.trim(),
+        details: itemsSummary,
+        total: formatVnd(total),
+      });
+      setOrderConfirmed(orderNumber);
+      setConfirmedAt(res.syncedAt ?? new Date().toISOString());
+      onClearCart();
+    } catch {
+      setErrorMsg('Không thể kết nối đến hệ thống lưu đơn. Vui lòng thử lại sau ít phút.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -88,7 +117,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <div className="flex items-center gap-2 text-[#3F2E24]">
                 <CheckCircle2 className="w-5 h-5 text-[#735748]" />
                 <h4 className="font-serif text-xl font-semibold">
-                  Đơn hàng {orderConfirmed} đã được tiếp nhận
+                  Đơn hàng {orderConfirmed} đã được lưu thành công
                 </h4>
               </div>
               <p className="text-sm text-[#4A352A] leading-relaxed">
@@ -96,10 +125,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <strong>{customerPhone}</strong> và chuẩn bị gói quà thủ công gửi tới{' '}
                 <strong>{deliveryAddress}</strong>.
               </p>
+              {confirmedAt && (
+                <p className="text-xs text-[#735748] tabular-nums">
+                  Ghi nhận lúc{' '}
+                  {new Date(confirmedAt).toLocaleTimeString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              )}
               <button
                 type="button"
                 onClick={() => {
                   setOrderConfirmed(null);
+                  setConfirmedAt(null);
                   onClose();
                 }}
                 className="px-4 py-2 text-xs font-semibold text-[#F4EBDD] bg-[#735748] rounded-lg cursor-pointer"
@@ -238,9 +277,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 )}
                 <button
                   type="submit"
-                  className="w-full py-3 text-sm font-semibold text-[#F4EBDD] bg-[#735748] hover:bg-[#3F2E24] rounded-lg transition-colors cursor-pointer"
+                  disabled={isSubmitting}
+                  className="w-full py-3 text-sm font-semibold text-[#F4EBDD] bg-[#735748] hover:bg-[#3F2E24] disabled:opacity-60 rounded-lg transition-colors cursor-pointer"
                 >
-                  Xác nhận đặt quà · {formatVnd(total)}
+                  {isSubmitting ? 'Đang gửi đơn...' : `Xác nhận đặt quà · ${formatVnd(total)}`}
                 </button>
               </form>
             </>
