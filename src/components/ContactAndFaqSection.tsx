@@ -65,10 +65,6 @@ export const ContactAndFaqSection: React.FC = () => {
                   <p>
                     <span className="font-semibold text-[#735748]">Hotline:</span> 0901 234 567
                   </p>
-                  <p>
-                    <span className="font-semibold text-[#735748]">Kênh chính thức:</span> Facebook
-                    · Instagram · TikTok (@mochoacraft)
-                  </p>
                 </div>
                 <p className="pt-3 border-t border-[#D8C9B7] font-serif italic text-[#735748]">
                   Gói dịu dàng gửi yêu thương.

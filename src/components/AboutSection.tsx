@@ -71,11 +71,11 @@ export const AboutSection: React.FC = () => {
             </div>
           </div>
 
-          <div className="aspect-[16/9] max-h-[480px] w-full rounded-2xl overflow-hidden border border-[#D8C9B7]">
+          <div className="w-full rounded-2xl overflow-hidden border border-[#D8C9B7]">
             <SafeImage
-              src={IMAGES.aboutFlatlay}
-              alt="Góc chế tác thủ công với hoa kẽm nhung, bưu thiếp Kraft, dây đay và kéo đồng"
-              className="w-full h-full object-cover"
+              src="/assets/aistudio/B_t___u_t__m_t_nh_nh_hoa_v__m_t_l_i_th__ng._d54796fc.png"
+              alt="Nhân sự vận hành Công ty Mộc Hoa – Gói dịu dàng gửi yêu thương"
+              className="w-full h-auto block"
             />
           </div>
         </div>
@@ -223,6 +223,14 @@ export const AboutSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 pt-8 border-t border-[#D8C9B7]">
           <div className="lg:col-span-5 bg-[#735748] text-[#F4EBDD] rounded-2xl p-8 flex flex-col justify-between">
             <div>
+              <div className="w-full rounded-xl overflow-hidden border border-[#F4EBDD]/20 mb-6 bg-[#3F2E24]/30">
+                <img
+                  src="/assets/aistudio/Ph_t_s_ng_tr_n_de29e79d.png"
+                  alt="Hình ảnh đại diện Mộc hoa"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-auto block"
+                />
+              </div>
               <p className="text-xs font-medium tracking-wider text-[#E7C5C0] mb-2">
                 Tầm nhìn · Vision
               </p>
@@ -288,7 +296,15 @@ export const AboutSection: React.FC = () => {
                   <SafeImage
                     src={val.image}
                     alt={val.name}
-                    className="w-full h-full object-cover"
+                    className={
+                      val.number === '01.'
+                        ? 'w-full h-full object-cover object-top'
+                        : val.number === '03.'
+                          ? 'w-full h-full object-cover object-[center_25%]'
+                          : val.number === '02.' || val.number === '04.' || val.number === '05.'
+                            ? 'w-full h-full object-cover object-[center_20%]'
+                            : 'w-full h-full object-cover'
+                    }
                   />
                 </div>
                 <div className="p-4 flex-1">

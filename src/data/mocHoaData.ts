@@ -194,8 +194,8 @@ export const SHOP_COLLECTIONS = [
       'Phù hợp cho: Sinh nhật, cảm ơn, tốt nghiệp, 20/10, 20/11, 8/3 và những dịp muốn gửi một lời thương nhỏ.',
     specialValue:
       'Giá trị đặc biệt: Không chỉ là một tấm thiệp, mà còn là một nhành hoa kỷ niệm để người nhận có thể giữ lại.',
-    image: IMAGES.clipCards,
-    imageAlt: 'Bộ sưu tập Thiệp hoa kẹp Signature Clip Card Mộc hoa',
+    image: '/src/assets/images/clip_card_chenille_note_1795154578416.jpg',
+    imageAlt: 'Thiệp hoa kẹp kẽm nhung kèm giấy thư viết tay và ảnh kỷ niệm Mộc hoa',
   },
   {
     id: 'chenille-flower' as const,
@@ -259,8 +259,8 @@ export const SHOP_PRODUCTS: ProductItem[] = [
     subtitle: 'Signature Clip Card · Thiệp gập đôi',
     price: 49000,
     priceFormatted: '49.000đ',
-    image: IMAGES.clipCards,
-    imageAlt: 'Thiệp Hoa Kẹp Tulip Nhung trên giấy mỹ thuật kem và Kraft',
+    image: '/assets/aistudio/image_4e502fa0.png',
+    imageAlt: 'Thiệp Hoa Kẹp kẽm nhung hồng phấn kèm giấy thư viết tay Mộc hoa',
     shortDesc: 'Giấy mỹ thuật kem hoặc Kraft định lượng cao, kèm nhành tulip kẽm nhung buộc nơ sợi đay.',
     details: [
       'Kích thước thiệp A6 (10.5 x 14.8 cm), thiết kế đơn hoặc gập đôi.',
@@ -403,31 +403,31 @@ export const CORE_VALUES = [
     number: '01.',
     name: 'Creativity – Sáng tạo',
     desc: 'Không ngừng đổi mới kiểu dáng, màu sắc và cách kết hợp các thành phần quà tặng.',
-    image: IMAGES.chenilleBouquet,
+    image: '/assets/aistudio/QUYNH_HAN__10__779a132f.png',
   },
   {
     number: '02.',
     name: 'Personalization – Cá nhân hóa',
     desc: 'Tôn trọng câu chuyện, sở thích và dấu ấn riêng của mỗi khách hàng.',
-    image: IMAGES.brandIntro,
+    image: '/assets/aistudio/QUYNH_HAN__9__2cc14846.png',
   },
   {
     number: '03.',
     name: 'Sincerity – Chân thành',
     desc: 'Đặt tình cảm và thông điệp của người tặng làm trọng tâm trong từng sản phẩm.',
-    image: IMAGES.clipCards,
+    image: '/assets/aistudio/QUYNH_HAN__12__b1d872ea.png',
   },
   {
     number: '04.',
     name: 'Craftsmanship – Tỉ mỉ',
     desc: 'Chú trọng chất lượng hoàn thiện và tính thẩm mỹ trong từng chi tiết thủ công.',
-    image: IMAGES.aboutFlatlay,
+    image: '/assets/aistudio/image_d32ed2d5.png',
   },
   {
     number: '05.',
     name: 'Longevity – Bền lâu',
     desc: 'Hướng đến những món quà có khả năng lưu giữ lâu dài, giúp kỷ niệm không chỉ tồn tại trong khoảnh khắc trao tặng.',
-    image: IMAGES.flowerBox,
+    image: '/assets/aistudio/QUYNH_HAN__11__9efb5dae.png',
   },
 ];
 
